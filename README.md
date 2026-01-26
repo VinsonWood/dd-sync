@@ -34,9 +34,9 @@
 
 ### 1. 安装依赖
 
-\`\`\`bash
+```bash
 npm install
-\`\`\`
+```
 
 ### 2. 配置 TikTokDownloader API
 
@@ -46,9 +46,9 @@ npm install
 
 ### 3. 启动开发服务器
 
-\`\`\`bash
+```bash
 npm run dev
-\`\`\`
+```
 
 访问 http://localhost:3000
 
@@ -58,7 +58,7 @@ npm run dev
 
 **docker-compose.yml**
 
-\`\`\`yaml
+```yaml
 version: "3.8"
 
 services:
@@ -76,24 +76,24 @@ services:
             - USER_GID=${USER_GID:-1001}
             - API_BASE_URL=http://192.168.60.20:5555
         restart: unless-stopped
-\`\`\`
+```
 
 **.env 文件**
 
-\`\`\`bash
+```bash
 # 用户 UID/GID（避免文件权限问题）
 USER_UID=1000
 USER_GID=1000
 
 # API 地址
 API_BASE_URL=http://192.168.60.20:5555
-\`\`\`
+```
 
 **启动服务**
 
-\`\`\`bash
+```bash
 docker-compose up -d
-\`\`\`
+```
 
 访问 http://localhost:3088
 
@@ -129,7 +129,7 @@ docker-compose up -d
 
 ## 项目结构
 
-\`\`\`
+```
 dd-sync/
 ├── app/                    # Next.js App Router
 │   ├── api/               # API 路由
@@ -160,7 +160,7 @@ dd-sync/
 ├── next.config.js         # Next.js 配置
 ├── tailwind.config.js     # Tailwind CSS 配置
 └── package.json           # 项目配置
-\`\`\`
+```
 
 ### Q: 调度器什么时候运行？
 A: 调度器在应用启动后 5 秒自动启动，每 10 分钟运行一次，同步所有启用的订阅。
