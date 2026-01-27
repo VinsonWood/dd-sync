@@ -18,8 +18,18 @@ const db = new Database(DB_PATH);
 // 启用 WAL 模式以提高并发性能
 db.pragma("journal_mode = WAL");
 
+// 使用全局变量防止热重载时重复初始化
+declare global {
+    var __db_initialized: boolean | undefined;
+    var __scheduler_started: boolean | undefined;
+}
+
 // 初始化数据库表
 function initDatabase() {
+    // 如果已经初始化过，直接返回
+    if (global.__db_initialized) {
+        return;
+    }
     // 下载任务表（包含所有视频信息）
     db.exec(`
     CREATE TABLE IF NOT EXISTS download_tasks (
@@ -92,7 +102,6 @@ function initDatabase() {
       cron_expression TEXT,
       enabled INTEGER DEFAULT 1,
       last_run_time INTEGER,
-      next_run_time INTEGER,
       created_at INTEGER NOT NULL,
       updated_at INTEGER NOT NULL
     );
@@ -143,9 +152,11 @@ function initDatabase() {
         { key: "api_base_url", value: "http://192.168.60.20:5555" },
         { key: "api_token", value: "" },
         { key: "folderNameFormat", value: "{nickname}_{type}" },
+        { key: "workFolderNameFormat", value: "{create_time}_{desc}" },
         { key: "fileNameFormat", value: "{desc}" },
         { key: "mark", value: "" },
         { key: "showImages", value: "true" },
+        { key: "nfo_format", value: "jellyfin" },
     ];
 
     const insertSetting = db.prepare(`
@@ -157,18 +168,19 @@ function initDatabase() {
         insertSetting.run(setting.key, setting.value, Date.now());
     }
 
-    logger.info("数据库初始化完成");
+    logger.debug("数据库初始化完成");
+    global.__db_initialized = true;
 }
 
 // 初始化数据库
 initDatabase();
 
-// 启动调度器（仅在服务端）
-if (typeof window === "undefined") {
+// 启动调度器（仅在服务端，且只启动一次）
+if (typeof window === "undefined" && !global.__scheduler_started) {
+    global.__scheduler_started = true;
     import("./scheduler").then(({ startScheduler }) => {
         // 延迟5秒启动调度器，确保数据库初始化完成
         setTimeout(() => {
-            logger.info("启动订阅同步调度器...");
             startScheduler();
         }, 5000);
     });

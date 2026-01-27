@@ -30,6 +30,8 @@ export default function SubscriptionsPage() {
     const [submitting, setSubmitting] = useState(false);
     const [syncing, setSyncing] = useState<Set<string>>(new Set());
     const [showDialog, setShowDialog] = useState(false);
+    const [showImportDialog, setShowImportDialog] = useState(false);
+    const [importing, setImporting] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         sec_user_id: "",
@@ -181,6 +183,79 @@ export default function SubscriptionsPage() {
         return new Date(timestamp).toLocaleString("zh-CN");
     }
 
+    // 导出订阅
+    async function handleExport() {
+        try {
+            const response = await axios.get(
+                "/api/subscriptions/import-export",
+                {
+                    responseType: "blob",
+                },
+            );
+
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute(
+                "download",
+                `dd-sync-subscriptions-${Date.now()}.json`,
+            );
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+
+            toast.success("订阅导出成功！");
+        } catch (error: any) {
+            toast.error(`导出失败：${error.message}`);
+        }
+    }
+
+    // 导入订阅
+    async function handleImport(file: File, mode: "skip" | "overwrite") {
+        setImporting(true);
+        try {
+            const text = await file.text();
+            const subscriptions = JSON.parse(text);
+
+            if (!Array.isArray(subscriptions)) {
+                throw new Error("无效的 JSON 格式");
+            }
+
+            const response = await axios.post(
+                "/api/subscriptions/import-export",
+                {
+                    subscriptions,
+                    mode,
+                },
+            );
+
+            if (response.data.success) {
+                const { total, success, skipped, failed, errors } =
+                    response.data.data;
+
+                let message = `导入完成！总计 ${total} 条`;
+                if (success > 0) message += `，成功 ${success} 条`;
+                if (skipped > 0) message += `，跳过 ${skipped} 条`;
+                if (failed > 0) message += `，失败 ${failed} 条`;
+
+                if (failed > 0 && errors.length > 0) {
+                    console.error("导入错误:", errors);
+                    toast.warning(message + "\n部分导入失败，请查看控制台");
+                } else {
+                    toast.success(message);
+                }
+
+                setShowImportDialog(false);
+                loadSubscriptions();
+            }
+        } catch (error: any) {
+            toast.error(`导入失败：${error.message}`);
+        } finally {
+            setImporting(false);
+        }
+    }
+
     const stats = {
         total: subscriptions.length,
         active: subscriptions.filter((s) => s.enabled).length,
@@ -212,12 +287,27 @@ export default function SubscriptionsPage() {
                         <span>启用: {stats.active}</span>
                         <span>禁用: {stats.inactive}</span>
                     </div>
-                    <button
-                        onClick={() => setShowDialog(true)}
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-                    >
-                        添加订阅
-                    </button>
+                    <div className="flex gap-3">
+                        <button
+                            onClick={handleExport}
+                            disabled={subscriptions.length === 0}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                        >
+                            导出订阅
+                        </button>
+                        <button
+                            onClick={() => setShowImportDialog(true)}
+                            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                        >
+                            导入订阅
+                        </button>
+                        <button
+                            onClick={() => setShowDialog(true)}
+                            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                        >
+                            添加订阅
+                        </button>
+                    </div>
                 </div>
 
                 {/* 订阅列表 */}
@@ -518,6 +608,130 @@ export default function SubscriptionsPage() {
                                 </div>
                             )}
                         </form>
+                    </div>
+                </div>
+            ) : null}
+
+            {/* 导入对话框 */}
+            {showImportDialog ? (
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                    onClick={() => !importing && setShowImportDialog(false)}
+                >
+                    <div
+                        className="bg-white dark:bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
+                            导入订阅
+                        </h2>
+
+                        <div className="space-y-4">
+                            <div className="p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg text-sm text-blue-700 dark:text-blue-300">
+                                <p className="font-medium mb-2">导入说明：</p>
+                                <ul className="list-disc list-inside space-y-1">
+                                    <li>支持导入 JSON 格式的订阅文件</li>
+                                    <li>可选择跳过或覆盖已存在的订阅</li>
+                                    <li>导入过程中请勿关闭页面</li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    选择文件
+                                </label>
+                                <input
+                                    type="file"
+                                    accept=".json"
+                                    id="import-file"
+                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                                    disabled={importing}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    导入模式
+                                </label>
+                                <select
+                                    id="import-mode"
+                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                                    disabled={importing}
+                                >
+                                    <option value="skip">
+                                        跳过已存在的订阅
+                                    </option>
+                                    <option value="overwrite">
+                                        覆盖已存在的订阅
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div className="flex gap-4 pt-4">
+                                <button
+                                    onClick={() => {
+                                        const fileInput =
+                                            document.getElementById(
+                                                "import-file",
+                                            ) as HTMLInputElement;
+                                        const modeSelect =
+                                            document.getElementById(
+                                                "import-mode",
+                                            ) as HTMLSelectElement;
+                                        const file = fileInput.files?.[0];
+                                        const mode = modeSelect.value as
+                                            | "skip"
+                                            | "overwrite";
+
+                                        if (!file) {
+                                            toast.error("请选择文件");
+                                            return;
+                                        }
+
+                                        handleImport(file, mode);
+                                    }}
+                                    disabled={importing}
+                                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                >
+                                    {importing ? "导入中..." : "开始导入"}
+                                </button>
+                                <button
+                                    onClick={() => setShowImportDialog(false)}
+                                    disabled={importing}
+                                    className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
+                                >
+                                    取消
+                                </button>
+                            </div>
+
+                            {importing && (
+                                <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg text-sm text-blue-700 dark:text-blue-300">
+                                    <div className="flex items-center gap-2">
+                                        <svg
+                                            className="animate-spin h-4 w-4"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <circle
+                                                className="opacity-25"
+                                                cx="12"
+                                                cy="12"
+                                                r="10"
+                                                stroke="currentColor"
+                                                strokeWidth="4"
+                                            ></circle>
+                                            <path
+                                                className="opacity-75"
+                                                fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                            ></path>
+                                        </svg>
+                                        <span>正在导入订阅，请稍候...</span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             ) : null}

@@ -9,9 +9,11 @@ export default function SettingsPage() {
         api_base_url: "",
         api_token: "",
         folderNameFormat: "",
+        workFolderNameFormat: "",
         fileNameFormat: "",
         mark: "",
         showImages: "true",
+        nfo_format: "jellyfin",
     });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -263,6 +265,76 @@ export default function SettingsPage() {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    作品文件夹命名格式
+                                </label>
+                                <div className="flex flex-wrap gap-2 mb-2">
+                                    {[
+                                        {
+                                            label: "时间_描述",
+                                            value: "{create_time}_{desc}",
+                                        },
+                                        {
+                                            label: "描述_ID",
+                                            value: "{desc}_{id}",
+                                        },
+                                        {
+                                            label: "ID_描述",
+                                            value: "{id}_{desc}",
+                                        },
+                                        {
+                                            label: "时间_ID",
+                                            value: "{create_time}_{id}",
+                                        },
+                                        {
+                                            label: "不使用",
+                                            value: "",
+                                        },
+                                    ].map((template) => (
+                                        <button
+                                            key={template.value}
+                                            type="button"
+                                            onClick={() =>
+                                                handleChange(
+                                                    "workFolderNameFormat",
+                                                    template.value,
+                                                )
+                                            }
+                                            className={`px-3 py-1 text-sm rounded-lg border transition-colors ${
+                                                settings.workFolderNameFormat ===
+                                                template.value
+                                                    ? "bg-blue-600 text-white border-blue-600"
+                                                    : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-blue-500"
+                                            }`}
+                                        >
+                                            {template.label}
+                                        </button>
+                                    ))}
+                                </div>
+                                <input
+                                    type="text"
+                                    value={settings.workFolderNameFormat}
+                                    onChange={(e) =>
+                                        handleChange(
+                                            "workFolderNameFormat",
+                                            e.target.value,
+                                        )
+                                    }
+                                    placeholder="{create_time}_{desc}"
+                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                                />
+                                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                    可用参数：{"{id}"}（作品ID）、{"{desc}"}
+                                    （描述）、{"{create_time}"}（发布时间）
+                                    <br />
+                                    示例：{"{create_time}_{desc}"} →
+                                    2025-01-27_今天天气真好
+                                    <br />
+                                    留空表示不使用作品文件夹，直接将文件保存在账号文件夹下
+                                </p>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     文件命名格式
                                 </label>
                                 <div className="flex flex-wrap gap-2 mb-2">
@@ -319,6 +391,54 @@ export default function SettingsPage() {
                                     <br />
                                     示例：{"{desc}_{id}"} →
                                     今天天气真好_7566208722012278051.mp4
+                                </p>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    NFO 元数据格式
+                                </label>
+                                <div className="flex flex-wrap gap-2 mb-2">
+                                    {[
+                                        {
+                                            label: "Jellyfin",
+                                            value: "jellyfin",
+                                        },
+                                        {
+                                            label: "Emby",
+                                            value: "emby",
+                                        },
+                                        {
+                                            label: "Plex",
+                                            value: "plex",
+                                        },
+                                    ].map((format) => (
+                                        <button
+                                            key={format.value}
+                                            type="button"
+                                            onClick={() =>
+                                                handleChange(
+                                                    "nfo_format",
+                                                    format.value,
+                                                )
+                                            }
+                                            className={`px-4 py-2 text-sm rounded-lg border transition-colors ${
+                                                settings.nfo_format ===
+                                                format.value
+                                                    ? "bg-blue-600 text-white border-blue-600"
+                                                    : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-blue-500"
+                                            }`}
+                                        >
+                                            {format.label}
+                                        </button>
+                                    ))}
+                                </div>
+                                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                    选择媒体服务器类型，下载视频时会自动生成对应格式的
+                                    NFO 元数据文件
+                                    <br />
+                                    NFO
+                                    文件包含视频标题、作者、发布时间、点赞数等信息，方便媒体服务器识别
                                 </p>
                             </div>
 

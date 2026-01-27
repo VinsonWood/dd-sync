@@ -20,11 +20,12 @@ export function startScheduler() {
 
     logger.info("启动订阅同步调度器...");
 
-    // 在数据库中创建或更新调度任务记录
+    // 从数据库读取调度任务配置
+    let cronExpression = "*/10 * * * *"; // 默认值
     try {
         const existingTask = db
             .prepare("SELECT * FROM schedule_tasks WHERE id = ?")
-            .get(SCHEDULER_TASK_ID);
+            .get(SCHEDULER_TASK_ID) as any;
         const now = Date.now();
 
         if (!existingTask) {
@@ -40,13 +41,15 @@ export function startScheduler() {
                 SCHEDULER_TASK_ID,
                 "订阅同步调度器",
                 "subscription_sync",
-                "*/10 * * * *",
+                cronExpression,
                 1,
                 now,
                 now,
             );
             logger.info("已创建调度任务记录");
         } else {
+            // 使用数据库中的 cron 表达式
+            cronExpression = existingTask.cron_expression || cronExpression;
             // 更新现有记录
             db.prepare(
                 `
@@ -55,35 +58,24 @@ export function startScheduler() {
         WHERE id = ?
       `,
             ).run(now, SCHEDULER_TASK_ID);
-            logger.info("已更新调度任务记录");
+            logger.info(
+                `已更新调度任务记录，使用 cron 表达式: ${cronExpression}`,
+            );
         }
     } catch (error: any) {
         logger.error("创建/更新调度任务记录失败:", error);
     }
 
-    // 每10分钟检查一次
-    globalThis.schedulerTask = cron.schedule("*/10 * * * *", async () => {
+    // 使用从数据库读取的 cron 表达式
+    globalThis.schedulerTask = cron.schedule(cronExpression, async () => {
         const executionStartTime = Date.now();
         logger.info(`[${new Date().toISOString()}] 执行订阅同步检查...`);
 
-        // 更新调度任务的运行时间和下次运行时间
+        // 更新调度任务的上次运行时间
         try {
-            // 计算下次运行时间
-            const interval = cronParser.CronExpressionParser.parse(
-                "*/10 * * * *",
-                {
-                    currentDate: new Date(executionStartTime),
-                },
-            );
-            const nextRunTime = interval.next().getTime();
-
             db.prepare(
-                `
-        UPDATE schedule_tasks
-        SET last_run_time = ?, next_run_time = ?
-        WHERE id = ?
-      `,
-            ).run(executionStartTime, nextRunTime, SCHEDULER_TASK_ID);
+                `UPDATE schedule_tasks SET last_run_time = ? WHERE id = ?`,
+            ).run(executionStartTime, SCHEDULER_TASK_ID);
         } catch (error: any) {
             logger.error("更新调度任务运行时间失败:", error);
         }
@@ -191,32 +183,6 @@ export function startScheduler() {
             }
 
             logger.info("订阅同步检查完成");
-
-            // 记录成功的调度日志
-            const executionEndTime = Date.now();
-            const logId = `log_${executionEndTime}_${Math.random().toString(36).slice(2, 11)}`;
-            try {
-                db.prepare(
-                    `
-          INSERT INTO schedule_logs (
-            id, task_id, start_time, end_time, status, message, details
-          ) VALUES (?, ?, ?, ?, ?, ?, ?)
-        `,
-                ).run(
-                    logId,
-                    SCHEDULER_TASK_ID,
-                    executionStartTime,
-                    executionEndTime,
-                    "success",
-                    `检查了 ${subscriptions.length} 个订阅`,
-                    JSON.stringify({
-                        subscriptions_count: subscriptions.length,
-                        duration: `${executionEndTime - executionStartTime}ms`,
-                    }),
-                );
-            } catch (error: any) {
-                logger.error("记录调度日志失败:", error);
-            }
         } catch (error: any) {
             logger.error("调度器执行出错:", error);
 
@@ -248,16 +214,22 @@ export function startScheduler() {
         }
     });
 
-    logger.info("调度器已启动，每10分钟检查一次");
+    logger.info(`调度器已启动，cron 表达式: ${cronExpression}`);
 }
 
-// 停止调度器
-export function stopScheduler() {
+// 重启调度器（用于应用新的 cron 表达式）
+export function restartScheduler() {
+    logger.info("重启调度器以应用新配置...");
+
+    // 停止现有调度器
     if (globalThis.schedulerTask) {
         globalThis.schedulerTask.stop();
         globalThis.schedulerTask = undefined;
-        logger.info("调度器已停止");
+        logger.info("已停止旧的调度器实例");
     }
+
+    // 启动新的调度器
+    startScheduler();
 }
 
 // 获取调度器状态
@@ -265,9 +237,19 @@ export function getSchedulerStatus(): boolean {
     return globalThis.schedulerTask !== undefined;
 }
 
-// 手动触发同步检查
-export async function triggerSync() {
-    logger.info("手动触发同步检查...");
-    // 调用调度逻辑（与 cron 中相同）
-    // 这里可以复用上面的逻辑或调用 API
+// 计算下次运行时间
+export function calculateNextRunTime(
+    cronExpression: string,
+    lastRunTime?: number,
+): number | null {
+    try {
+        const baseTime = lastRunTime ? new Date(lastRunTime) : new Date();
+        const interval = cronParser.CronExpressionParser.parse(cronExpression, {
+            currentDate: baseTime,
+        });
+        return interval.next().getTime();
+    } catch (error: any) {
+        logger.error("计算下次运行时间失败:", error);
+        return null;
+    }
 }

@@ -168,11 +168,23 @@ export default function SchedulesPage() {
 
     function getCronDescription(cron: string): string {
         const presets: Record<string, string> = {
+            "*/5 * * * *": "每 5 分钟",
             "*/10 * * * *": "每 10 分钟",
+            "*/15 * * * *": "每 15 分钟",
+            "*/20 * * * *": "每 20 分钟",
             "*/30 * * * *": "每 30 分钟",
             "0 * * * *": "每小时",
+            "0 */2 * * *": "每 2 小时",
+            "0 */3 * * *": "每 3 小时",
+            "0 */4 * * *": "每 4 小时",
             "0 */6 * * *": "每 6 小时",
+            "0 */12 * * *": "每 12 小时",
             "0 0 * * *": "每天 00:00",
+            "0 6 * * *": "每天 06:00",
+            "0 12 * * *": "每天 12:00",
+            "0 18 * * *": "每天 18:00",
+            "0 0 * * 0": "每周日 00:00",
+            "0 0 1 * *": "每月 1 日 00:00",
         };
         return presets[cron] || cron;
     }
@@ -214,23 +226,16 @@ export default function SchedulesPage() {
                                 </span>
                             </div>
                         </div>
-                        <div className="flex gap-3">
-                            {schedulerRunning ? (
-                                <button
-                                    onClick={() => toggleScheduler("stop")}
-                                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-                                >
-                                    停止调度器
-                                </button>
-                            ) : (
+                        {!schedulerRunning && (
+                            <div className="flex gap-3">
                                 <button
                                     onClick={() => toggleScheduler("start")}
                                     className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
                                 >
                                     启动调度器
                                 </button>
-                            )}
-                        </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -518,18 +523,54 @@ export default function SchedulesPage() {
                                     }
                                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                 >
+                                    <option value="*/5 * * * *">
+                                        每 5 分钟
+                                    </option>
                                     <option value="*/10 * * * *">
                                         每 10 分钟
+                                    </option>
+                                    <option value="*/15 * * * *">
+                                        每 15 分钟
+                                    </option>
+                                    <option value="*/20 * * * *">
+                                        每 20 分钟
                                     </option>
                                     <option value="*/30 * * * *">
                                         每 30 分钟
                                     </option>
                                     <option value="0 * * * *">每小时</option>
+                                    <option value="0 */2 * * *">
+                                        每 2 小时
+                                    </option>
+                                    <option value="0 */3 * * *">
+                                        每 3 小时
+                                    </option>
+                                    <option value="0 */4 * * *">
+                                        每 4 小时
+                                    </option>
                                     <option value="0 */6 * * *">
                                         每 6 小时
                                     </option>
+                                    <option value="0 */12 * * *">
+                                        每 12 小时
+                                    </option>
                                     <option value="0 0 * * *">
                                         每天 00:00
+                                    </option>
+                                    <option value="0 6 * * *">
+                                        每天 06:00
+                                    </option>
+                                    <option value="0 12 * * *">
+                                        每天 12:00
+                                    </option>
+                                    <option value="0 18 * * *">
+                                        每天 18:00
+                                    </option>
+                                    <option value="0 0 * * 0">
+                                        每周日 00:00
+                                    </option>
+                                    <option value="0 0 1 * *">
+                                        每月 1 日 00:00
                                     </option>
                                 </select>
                             </div>
