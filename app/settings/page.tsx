@@ -68,9 +68,9 @@ export default function SettingsPage() {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-            <main className="max-w-3xl mx-auto px-4 py-8">
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <h2 className="text-xl font-semibold mb-6 text-gray-900 dark:text-white">
+            <main className="max-w-3xl mx-auto px-4 py-6 sm:py-8 pt-16 lg:pt-8">
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6">
+                    <h2 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-gray-900 dark:text-white">
                         系统设置
                     </h2>
 
@@ -230,7 +230,7 @@ export default function SettingsPage() {
                                                     template.value,
                                                 )
                                             }
-                                            className={`px-3 py-1 text-sm rounded-lg border transition-colors ${
+                                            className={`px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-lg border transition-colors ${
                                                 settings.folderNameFormat ===
                                                 template.value
                                                     ? "bg-blue-600 text-white border-blue-600"
@@ -299,7 +299,7 @@ export default function SettingsPage() {
                                                     template.value,
                                                 )
                                             }
-                                            className={`px-3 py-1 text-sm rounded-lg border transition-colors ${
+                                            className={`px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-lg border transition-colors ${
                                                 settings.workFolderNameFormat ===
                                                 template.value
                                                     ? "bg-blue-600 text-white border-blue-600"
@@ -362,7 +362,7 @@ export default function SettingsPage() {
                                                     template.value,
                                                 )
                                             }
-                                            className={`px-3 py-1 text-sm rounded-lg border transition-colors ${
+                                            className={`px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-lg border transition-colors ${
                                                 settings.fileNameFormat ===
                                                 template.value
                                                     ? "bg-blue-600 text-white border-blue-600"
@@ -422,7 +422,7 @@ export default function SettingsPage() {
                                                     format.value,
                                                 )
                                             }
-                                            className={`px-4 py-2 text-sm rounded-lg border transition-colors ${
+                                            className={`px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-lg border transition-colors ${
                                                 settings.nfo_format ===
                                                 format.value
                                                     ? "bg-blue-600 text-white border-blue-600"
@@ -454,17 +454,17 @@ export default function SettingsPage() {
                                 </div>
                             )}
 
-                            <div className="flex gap-4">
+                            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                                 <button
                                     onClick={saveSettings}
                                     disabled={saving}
-                                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 dark:disabled:bg-gray-800"
+                                    className="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 dark:disabled:bg-gray-800"
                                 >
                                     {saving ? "保存中..." : "保存设置"}
                                 </button>
                                 <button
                                     onClick={loadSettings}
-                                    className="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
+                                    className="w-full sm:w-auto px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
                                 >
                                     重置
                                 </button>

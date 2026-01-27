@@ -13,7 +13,7 @@ export default function ClientLayout({
         <ThemeProvider>
             <TermsOfService />
             <Sidebar />
-            <main className="ml-64">{children}</main>
+            <main className="lg:ml-64">{children}</main>
         </ThemeProvider>
     );
 }

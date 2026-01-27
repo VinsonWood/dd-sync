@@ -273,46 +273,48 @@ export default function SubscriptionsPage() {
     }
 
     return (
-        <div className="min-h-screen p-8">
+        <div className="min-h-screen p-4 sm:p-6 lg:p-8 pt-16 lg:pt-8">
             <ToastContainer toasts={toasts} onRemove={removeToast} />
 
             <div className="max-w-7xl mx-auto">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-6 sm:mb-8">
                     订阅管理
                 </h1>
                 {/* 操作栏 */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8 flex justify-between items-center">
-                    <div className="flex gap-6 text-sm text-gray-600 dark:text-gray-400">
-                        <span>订阅总数: {stats.total}</span>
-                        <span>启用: {stats.active}</span>
-                        <span>禁用: {stats.inactive}</span>
-                    </div>
-                    <div className="flex gap-3">
-                        <button
-                            onClick={handleExport}
-                            disabled={subscriptions.length === 0}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                        >
-                            导出订阅
-                        </button>
-                        <button
-                            onClick={() => setShowImportDialog(true)}
-                            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-                        >
-                            导入订阅
-                        </button>
-                        <button
-                            onClick={() => setShowDialog(true)}
-                            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-                        >
-                            添加订阅
-                        </button>
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6 mb-6 sm:mb-8">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div className="flex flex-wrap gap-3 sm:gap-6 text-sm text-gray-600 dark:text-gray-400">
+                            <span>订阅总数: {stats.total}</span>
+                            <span>启用: {stats.active}</span>
+                            <span>禁用: {stats.inactive}</span>
+                        </div>
+                        <div className="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
+                            <button
+                                onClick={handleExport}
+                                disabled={subscriptions.length === 0}
+                                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                            >
+                                导出
+                            </button>
+                            <button
+                                onClick={() => setShowImportDialog(true)}
+                                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                            >
+                                导入
+                            </button>
+                            <button
+                                onClick={() => setShowDialog(true)}
+                                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700"
+                            >
+                                添加
+                            </button>
+                        </div>
                     </div>
                 </div>
 
                 {/* 订阅列表 */}
                 {subscriptions.length === 0 ? (
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-12 text-center">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-8 sm:p-12 text-center">
                         <p className="text-gray-500 dark:text-gray-400 mb-4">
                             暂无订阅
                         </p>
@@ -324,11 +326,11 @@ export default function SubscriptionsPage() {
                         </button>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                         {subscriptions.map((sub) => (
                             <div
                                 key={sub.id}
-                                className={`bg-white dark:bg-gray-800 rounded-lg shadow p-6 ${
+                                className={`bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6 ${
                                     !sub.enabled ? "opacity-60" : ""
                                 }`}
                             >
@@ -414,22 +416,22 @@ export default function SubscriptionsPage() {
                                 <div className="grid grid-cols-2 gap-2">
                                     <Link
                                         href={`/subscriptions/${sub.id}`}
-                                        className="px-3 py-2 bg-purple-600 text-white rounded text-sm hover:bg-purple-700 text-center"
+                                        className="px-2 sm:px-3 py-2 bg-purple-600 text-white rounded text-xs sm:text-sm hover:bg-purple-700 text-center"
                                     >
-                                        查看详情
+                                        详情
                                     </Link>
                                     <button
                                         onClick={() => syncSubscription(sub.id)}
                                         disabled={syncing.has(sub.id)}
-                                        className="px-3 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:bg-gray-400"
+                                        className="px-2 sm:px-3 py-2 bg-blue-600 text-white rounded text-xs sm:text-sm hover:bg-blue-700 disabled:bg-gray-400"
                                     >
                                         {syncing.has(sub.id)
                                             ? "同步中..."
-                                            : "立即同步"}
+                                            : "同步"}
                                     </button>
                                     <button
                                         onClick={() => openEditDialog(sub)}
-                                        className="px-3 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700"
+                                        className="px-2 sm:px-3 py-2 bg-green-600 text-white rounded text-xs sm:text-sm hover:bg-green-700"
                                     >
                                         编辑
                                     </button>
@@ -440,7 +442,7 @@ export default function SubscriptionsPage() {
                                                 sub.enabled,
                                             )
                                         }
-                                        className="px-3 py-2 bg-orange-500 text-white rounded text-sm hover:bg-orange-600"
+                                        className="px-2 sm:px-3 py-2 bg-orange-500 text-white rounded text-xs sm:text-sm hover:bg-orange-600"
                                     >
                                         {sub.enabled ? "禁用" : "启用"}
                                     </button>
