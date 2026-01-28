@@ -12,18 +12,9 @@
         "test:api": "node test/api.test.cjs",
         "test:advanced": "node test/selenium.advanced.cjs",
         "test:headed": "HEADLESS=false node test/selenium.test.cjs",
-        "test:all": "node test/api.test.cjs && node test/selenium.test.cjs && node test/selenium.advanced.cjs",
-        "mobile:sync": "npx cap sync",
-        "mobile:android": "npm run mobile:sync && npx cap open android",
-        "mobile:ios": "npm run mobile:sync && npx cap open ios",
-        "mobile:run:android": "npm run mobile:sync && npx cap run android",
-        "mobile:run:ios": "npm run mobile:sync && npx cap run ios"
+        "test:all": "node test/api.test.cjs && node test/selenium.test.cjs && node test/selenium.advanced.cjs"
     },
     "dependencies": {
-        "@capacitor/android": "^8.0.2",
-        "@capacitor/cli": "^8.0.2",
-        "@capacitor/core": "^8.0.2",
-        "@capacitor/ios": "^8.0.2",
         "@tailwindcss/postcss": "^4.1.18",
         "@types/better-sqlite3": "^7.6.13",
         "@types/node-cron": "^3.0.11",

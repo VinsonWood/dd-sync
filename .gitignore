@@ -30,11 +30,6 @@ next-env.d.ts
 # Deploy
 /deploy
 
-# Capacitor
-android/
-ios/
-.capacitor/
-
 # Misc
 .DS_Store
 *.pem
@@ -67,3 +62,5 @@ test-*.js
 test-*.sh
 test-*.json
 test_*.py
+
+dd-sync.keystore
