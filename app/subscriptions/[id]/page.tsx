@@ -9,23 +9,64 @@ import { useToast, ToastContainer } from "@/components/Toast";
 // 图集轮播组件
 function ImageCarousel({ urls, alt }: { urls: string[]; alt: string }) {
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [touchStart, setTouchStart] = useState(0);
+    const [touchEnd, setTouchEnd] = useState(0);
 
-    const goToPrevious = () => {
+    const goToPrevious = (e: React.MouseEvent) => {
+        e.stopPropagation();
         setCurrentIndex((prev) => (prev === 0 ? urls.length - 1 : prev - 1));
     };
 
-    const goToNext = () => {
+    const goToNext = (e: React.MouseEvent) => {
+        e.stopPropagation();
         setCurrentIndex((prev) => (prev === urls.length - 1 ? 0 : prev + 1));
+    };
+
+    // 触摸滑动支持
+    const handleTouchStart = (e: React.TouchEvent) => {
+        setTouchStart(e.targetTouches[0].clientX);
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        setTouchEnd(e.targetTouches[0].clientX);
+    };
+
+    const handleTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > 50;
+        const isRightSwipe = distance < -50;
+
+        if (isLeftSwipe) {
+            setCurrentIndex((prev) =>
+                prev === urls.length - 1 ? 0 : prev + 1,
+            );
+        }
+        if (isRightSwipe) {
+            setCurrentIndex((prev) =>
+                prev === 0 ? urls.length - 1 : prev - 1,
+            );
+        }
+
+        setTouchStart(0);
+        setTouchEnd(0);
     };
 
     if (urls.length === 0) return null;
 
     return (
-        <div className="relative w-32 h-24 group">
+        <div
+            className="relative w-full sm:w-32 h-48 sm:h-24 group"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+        >
             <img
                 src={urls[currentIndex]}
                 alt={`${alt} - ${currentIndex + 1}`}
-                className="w-full h-full object-cover rounded"
+                className="w-full h-full object-cover rounded select-none"
+                draggable={false}
             />
 
             {/* 左右切换按钮 */}
@@ -33,33 +74,40 @@ function ImageCarousel({ urls, alt }: { urls: string[]; alt: string }) {
                 <>
                     <button
                         onClick={goToPrevious}
-                        className="absolute left-1 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute left-2 sm:left-1 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white rounded-full w-9 h-9 sm:w-6 sm:h-6 flex items-center justify-center sm:opacity-0 sm:group-hover:opacity-100 transition-all text-xl sm:text-base z-10 shadow-lg active:scale-95"
+                        aria-label="上一张"
                     >
                         ‹
                     </button>
                     <button
                         onClick={goToNext}
-                        className="absolute right-1 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute right-2 sm:right-1 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white rounded-full w-9 h-9 sm:w-6 sm:h-6 flex items-center justify-center sm:opacity-0 sm:group-hover:opacity-100 transition-all text-xl sm:text-base z-10 shadow-lg active:scale-95"
+                        aria-label="下一张"
                     >
                         ›
                     </button>
 
-                    {/* 指示器 */}
-                    <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex space-x-1">
+                    {/* 指示器 - 移动端可点击切换 */}
+                    <div className="absolute bottom-2 sm:bottom-1 left-1/2 -translate-x-1/2 flex space-x-1.5 z-10 bg-black/30 px-2 py-1 rounded-full">
                         {urls.map((_, index) => (
-                            <div
+                            <button
                                 key={index}
-                                className={`w-1.5 h-1.5 rounded-full ${
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setCurrentIndex(index);
+                                }}
+                                className={`w-2 h-2 sm:w-1.5 sm:h-1.5 rounded-full transition-all ${
                                     index === currentIndex
-                                        ? "bg-white"
-                                        : "bg-white/50"
+                                        ? "bg-white scale-125"
+                                        : "bg-white/50 hover:bg-white/70"
                                 }`}
+                                aria-label={`切换到第 ${index + 1} 张`}
                             />
                         ))}
                     </div>
 
                     {/* 图片计数 */}
-                    <div className="absolute top-1 right-1 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded">
+                    <div className="absolute top-2 sm:top-1 right-2 sm:right-1 bg-black/60 text-white text-xs font-medium px-2 py-1 sm:px-1.5 sm:py-0.5 rounded shadow-lg">
                         {currentIndex + 1}/{urls.length}
                     </div>
                 </>
@@ -303,7 +351,7 @@ export default function SubscriptionDetailPage() {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
             <ToastContainer toasts={toasts} onRemove={removeToast} />
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 pt-20 sm:pt-8">
                 {/* 返回按钮 */}
                 <div className="mb-6">
                     <Link
@@ -314,66 +362,70 @@ export default function SubscriptionDetailPage() {
                     </Link>
                 </div>
                 {/* 订阅信息卡片 */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
-                    <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <div>
-                                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                                        同步间隔
-                                    </div>
-                                    <div className="text-lg font-semibold text-gray-900 dark:text-white">
-                                        {subscription.sync_interval} 分钟
-                                    </div>
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6 mb-6">
+                    <div className="flex flex-col space-y-4">
+                        {/* 统计信息 */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+                            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
+                                <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1">
+                                    同步间隔
                                 </div>
-                                <div>
-                                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                                        时间范围
-                                    </div>
-                                    <div className="text-lg font-semibold text-gray-900 dark:text-white">
-                                        {subscription.time_range === "all" &&
-                                            "全部"}
-                                        {subscription.time_range ===
-                                            "half-year" && "最近半年"}
-                                        {subscription.time_range ===
-                                            "one-month" && "最近一月"}
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                                        发现视频
-                                    </div>
-                                    <div className="text-lg font-semibold text-gray-900 dark:text-white">
-                                        {subscription.total_videos}
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                                        已下载
-                                    </div>
-                                    <div className="text-lg font-semibold text-gray-900 dark:text-white">
-                                        {subscription.downloaded_count}
-                                    </div>
+                                <div className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+                                    {subscription.sync_interval} 分钟
                                 </div>
                             </div>
-                            {subscription.last_sync_time && (
-                                <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
-                                    上次同步:{" "}
-                                    {formatDate(subscription.last_sync_time)}
+                            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
+                                <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1">
+                                    时间范围
                                 </div>
-                            )}
+                                <div className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+                                    {subscription.time_range === "all" &&
+                                        "全部"}
+                                    {subscription.time_range === "half-year" &&
+                                        "最近半年"}
+                                    {subscription.time_range === "one-month" &&
+                                        "最近一月"}
+                                </div>
+                            </div>
+                            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
+                                <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1">
+                                    发现视频
+                                </div>
+                                <div className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+                                    {subscription.total_videos}
+                                </div>
+                            </div>
+                            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
+                                <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1">
+                                    已下载
+                                </div>
+                                <div className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+                                    {subscription.downloaded_count}
+                                </div>
+                            </div>
                         </div>
-                        <div className="ml-4 flex gap-2">
+
+                        {/* 上次同步时间 */}
+                        {subscription.last_sync_time && (
+                            <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 flex items-center">
+                                <span className="mr-1">🕐</span>
+                                上次同步:{" "}
+                                {formatDate(subscription.last_sync_time)}
+                            </div>
+                        )}
+
+                        {/* 操作按钮 */}
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                             <button
                                 onClick={handleSync}
                                 disabled={syncing}
-                                className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                className="flex-1 px-4 sm:px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-sm sm:text-base font-medium transition-colors shadow-sm active:scale-[0.98]"
                             >
                                 {syncing ? "同步中..." : "立即同步"}
                             </button>
                             <button
                                 onClick={() => setShowClearDialog(true)}
-                                className="px-6 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                                className="flex-1 px-4 sm:px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm sm:text-base font-medium transition-colors shadow-sm active:scale-[0.98]"
                             >
                                 清除记录
                             </button>
@@ -382,77 +434,79 @@ export default function SubscriptionDetailPage() {
                 </div>
 
                 {/* 统计卡片 */}
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 mb-6">
                     <button
                         onClick={() => setStatusFilter("all")}
-                        className={`bg-white dark:bg-gray-800 rounded-lg shadow p-4 text-center hover:shadow-md transition-shadow ${
-                            statusFilter === "all" ? "ring-2 ring-blue-500" : ""
+                        className={`bg-white dark:bg-gray-800 rounded-lg shadow p-3 sm:p-4 text-center hover:shadow-md transition-all active:scale-95 ${
+                            statusFilter === "all"
+                                ? "ring-2 ring-blue-500 shadow-md"
+                                : ""
                         }`}
                     >
-                        <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                        <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
                             {stats.total}
                         </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                        <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
                             全部
                         </div>
                     </button>
                     <button
                         onClick={() => setStatusFilter("pending")}
-                        className={`bg-white dark:bg-gray-800 rounded-lg shadow p-4 text-center hover:shadow-md transition-shadow ${
+                        className={`bg-white dark:bg-gray-800 rounded-lg shadow p-3 sm:p-4 text-center hover:shadow-md transition-all active:scale-95 ${
                             statusFilter === "pending"
-                                ? "ring-2 ring-blue-500"
+                                ? "ring-2 ring-blue-500 shadow-md"
                                 : ""
                         }`}
                     >
-                        <div className="text-2xl font-bold text-gray-500 dark:text-gray-400">
+                        <div className="text-xl sm:text-2xl font-bold text-gray-500 dark:text-gray-400">
                             {stats.pending}
                         </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                        <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
                             等待中
                         </div>
                     </button>
                     <button
                         onClick={() => setStatusFilter("downloading")}
-                        className={`bg-white dark:bg-gray-800 rounded-lg shadow p-4 text-center hover:shadow-md transition-shadow ${
+                        className={`bg-white dark:bg-gray-800 rounded-lg shadow p-3 sm:p-4 text-center hover:shadow-md transition-all active:scale-95 ${
                             statusFilter === "downloading"
-                                ? "ring-2 ring-blue-500"
+                                ? "ring-2 ring-blue-500 shadow-md"
                                 : ""
                         }`}
                     >
-                        <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                        <div className="text-xl sm:text-2xl font-bold text-blue-600 dark:text-blue-400">
                             {stats.downloading}
                         </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                        <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
                             下载中
                         </div>
                     </button>
                     <button
                         onClick={() => setStatusFilter("completed")}
-                        className={`bg-white dark:bg-gray-800 rounded-lg shadow p-4 text-center hover:shadow-md transition-shadow ${
+                        className={`bg-white dark:bg-gray-800 rounded-lg shadow p-3 sm:p-4 text-center hover:shadow-md transition-all active:scale-95 ${
                             statusFilter === "completed"
-                                ? "ring-2 ring-blue-500"
+                                ? "ring-2 ring-blue-500 shadow-md"
                                 : ""
                         }`}
                     >
-                        <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                        <div className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400">
                             {stats.completed}
                         </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                        <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
                             已完成
                         </div>
                     </button>
                     <button
                         onClick={() => setStatusFilter("failed")}
-                        className={`bg-white dark:bg-gray-800 rounded-lg shadow p-4 text-center hover:shadow-md transition-shadow ${
+                        className={`bg-white dark:bg-gray-800 rounded-lg shadow p-3 sm:p-4 text-center hover:shadow-md transition-all active:scale-95 col-span-2 sm:col-span-1 ${
                             statusFilter === "failed"
-                                ? "ring-2 ring-blue-500"
+                                ? "ring-2 ring-blue-500 shadow-md"
                                 : ""
                         }`}
                     >
-                        <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                        <div className="text-xl sm:text-2xl font-bold text-red-600 dark:text-red-400">
                             {stats.failed}
                         </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                        <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
                             失败
                         </div>
                     </button>
@@ -485,9 +539,9 @@ export default function SubscriptionDetailPage() {
                                 return (
                                     <div
                                         key={task.id}
-                                        className="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700"
+                                        className="px-3 sm:px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700"
                                     >
-                                        <div className="flex items-start space-x-4">
+                                        <div className="flex flex-col sm:flex-row sm:items-start space-y-3 sm:space-y-0 sm:space-x-4">
                                             {/* 封面/轮播 - 根据设置显示 */}
                                             {showImages && (
                                                 <>
@@ -507,7 +561,7 @@ export default function SubscriptionDetailPage() {
                                                                 task.desc ||
                                                                 "视频封面"
                                                             }
-                                                            className="w-32 h-24 object-cover rounded flex-shrink-0"
+                                                            className="w-full sm:w-32 h-48 sm:h-24 object-cover rounded flex-shrink-0"
                                                             onError={(e) => {
                                                                 const target =
                                                                     e.target as HTMLImageElement;
@@ -516,7 +570,7 @@ export default function SubscriptionDetailPage() {
                                                             }}
                                                         />
                                                     ) : (
-                                                        <div className="w-32 h-24 bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center flex-shrink-0">
+                                                        <div className="w-full sm:w-32 h-48 sm:h-24 bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center flex-shrink-0">
                                                             <span className="text-gray-400 dark:text-gray-500 text-xs">
                                                                 无封面
                                                             </span>
@@ -527,13 +581,13 @@ export default function SubscriptionDetailPage() {
 
                                             {/* 信息 */}
                                             <div className="flex-1 min-w-0">
-                                                <div className="flex items-start justify-between">
-                                                    <div className="flex-1">
-                                                        <h3 className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-2 sm:space-y-0">
+                                                    <div className="flex-1 min-w-0">
+                                                        <h3 className="text-sm font-medium text-gray-900 dark:text-white line-clamp-2 sm:truncate">
                                                             {task.desc ||
                                                                 "无标题"}
                                                         </h3>
-                                                        <div className="mt-1 flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-400">
+                                                        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
                                                             <span>
                                                                 {task.type}
                                                             </span>
@@ -568,14 +622,14 @@ export default function SubscriptionDetailPage() {
                                                                     task.comment_count
                                                                 }
                                                             </span>
-                                                            <span>
+                                                            <span className="hidden sm:inline">
                                                                 {
                                                                     task.create_time
                                                                 }
                                                             </span>
                                                         </div>
                                                     </div>
-                                                    <div className="ml-4">
+                                                    <div className="sm:ml-4 self-start">
                                                         {getStatusBadge(
                                                             task.status,
                                                         )}

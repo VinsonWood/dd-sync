@@ -341,11 +341,11 @@ export default function SubscriptionsPage() {
                                             <img
                                                 src={sub.avatar}
                                                 alt={sub.nickname}
-                                                className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+                                                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover flex-shrink-0"
                                             />
                                         )}
                                         <div className="min-w-0 flex-1">
-                                            <h3 className="font-semibold text-gray-900 dark:text-white truncate">
+                                            <h3 className="font-semibold text-base sm:text-lg text-gray-900 dark:text-white truncate">
                                                 {sub.nickname}
                                             </h3>
                                             <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
@@ -354,7 +354,7 @@ export default function SubscriptionsPage() {
                                         </div>
                                     </div>
                                     <span
-                                        className={`px-2 py-1 rounded text-xs ${
+                                        className={`px-2 py-1 rounded text-xs flex-shrink-0 ${
                                             sub.enabled
                                                 ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
                                                 : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
@@ -372,7 +372,7 @@ export default function SubscriptionsPage() {
                                                 发现视频
                                             </div>
                                         </Tooltip>
-                                        <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                                        <div className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">
                                             {sub.total_videos}
                                         </div>
                                     </div>
@@ -382,70 +382,94 @@ export default function SubscriptionsPage() {
                                                 已下载
                                             </div>
                                         </Tooltip>
-                                        <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                                        <div className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">
                                             {sub.downloaded_count}
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* 配置 */}
-                                <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1 mb-4">
-                                    <div>
-                                        时间范围:{" "}
-                                        {formatTimeRange(sub.time_range)}
+                                <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1.5 mb-4">
+                                    <div className="flex items-center">
+                                        <span className="text-gray-500 dark:text-gray-500 mr-2">
+                                            📅
+                                        </span>
+                                        <span>
+                                            时间范围:{" "}
+                                            {formatTimeRange(sub.time_range)}
+                                        </span>
                                     </div>
                                     {sub.min_digg_count && (
-                                        <div>
-                                            最低点赞: {sub.min_digg_count}
+                                        <div className="flex items-center">
+                                            <span className="text-gray-500 dark:text-gray-500 mr-2">
+                                                👍
+                                            </span>
+                                            <span>
+                                                最低点赞: {sub.min_digg_count}
+                                            </span>
                                         </div>
                                     )}
-                                    <div>
-                                        自动下载:{" "}
-                                        {sub.auto_download ? "开启" : "关闭"}
+                                    <div className="flex items-center">
+                                        <span className="text-gray-500 dark:text-gray-500 mr-2">
+                                            ⬇️
+                                        </span>
+                                        <span>
+                                            自动下载:{" "}
+                                            {sub.auto_download
+                                                ? "开启"
+                                                : "关闭"}
+                                        </span>
                                     </div>
                                 </div>
 
                                 {/* 上次同步 */}
-                                <div className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                                <div className="text-xs text-gray-500 dark:text-gray-400 mb-4 flex items-center">
+                                    <span className="mr-1">🕐</span>
                                     {sub.last_sync_time
                                         ? `上次同步: ${formatTime(sub.last_sync_time)}`
                                         : "从未同步"}
                                 </div>
 
-                                {/* 操作按钮 */}
-                                <div className="grid grid-cols-2 gap-2">
-                                    <Link
-                                        href={`/subscriptions/${sub.id}`}
-                                        className="px-2 sm:px-3 py-2 bg-purple-600 text-white rounded text-xs sm:text-sm hover:bg-purple-700 text-center"
-                                    >
-                                        详情
-                                    </Link>
-                                    <button
-                                        onClick={() => syncSubscription(sub.id)}
-                                        disabled={syncing.has(sub.id)}
-                                        className="px-2 sm:px-3 py-2 bg-blue-600 text-white rounded text-xs sm:text-sm hover:bg-blue-700 disabled:bg-gray-400"
-                                    >
-                                        {syncing.has(sub.id)
-                                            ? "同步中..."
-                                            : "同步"}
-                                    </button>
-                                    <button
-                                        onClick={() => openEditDialog(sub)}
-                                        className="px-2 sm:px-3 py-2 bg-green-600 text-white rounded text-xs sm:text-sm hover:bg-green-700"
-                                    >
-                                        编辑
-                                    </button>
-                                    <button
-                                        onClick={() =>
-                                            toggleSubscription(
-                                                sub.id,
-                                                sub.enabled,
-                                            )
-                                        }
-                                        className="px-2 sm:px-3 py-2 bg-orange-500 text-white rounded text-xs sm:text-sm hover:bg-orange-600"
-                                    >
-                                        {sub.enabled ? "禁用" : "启用"}
-                                    </button>
+                                {/* 操作按钮 - 移动端优化 */}
+                                <div className="space-y-2">
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <Link
+                                            href={`/subscriptions/${sub.id}`}
+                                            className="px-3 py-2.5 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 text-center transition-colors"
+                                        >
+                                            详情
+                                        </Link>
+                                        <button
+                                            onClick={() =>
+                                                syncSubscription(sub.id)
+                                            }
+                                            disabled={syncing.has(sub.id)}
+                                            className="px-3 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                                        >
+                                            {syncing.has(sub.id)
+                                                ? "同步中..."
+                                                : "同步"}
+                                        </button>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <button
+                                            onClick={() => openEditDialog(sub)}
+                                            className="px-3 py-2.5 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
+                                        >
+                                            编辑
+                                        </button>
+                                        <button
+                                            onClick={() =>
+                                                toggleSubscription(
+                                                    sub.id,
+                                                    sub.enabled,
+                                                )
+                                            }
+                                            className="px-3 py-2.5 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors"
+                                        >
+                                            {sub.enabled ? "禁用" : "启用"}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         ))}

@@ -202,7 +202,7 @@ export default function SettingsPage() {
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     文件夹命名格式
                                 </label>
-                                <div className="flex flex-wrap gap-2 mb-2">
+                                <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 mb-2">
                                     {[
                                         {
                                             label: "UID_昵称_类型",
@@ -230,11 +230,11 @@ export default function SettingsPage() {
                                                     template.value,
                                                 )
                                             }
-                                            className={`px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-lg border transition-colors ${
+                                            className={`px-3 py-2 text-xs sm:text-sm rounded-lg border transition-colors font-medium ${
                                                 settings.folderNameFormat ===
                                                 template.value
-                                                    ? "bg-blue-600 text-white border-blue-600"
-                                                    : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-blue-500"
+                                                    ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                                                    : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-blue-500 active:scale-95"
                                             }`}
                                         >
                                             {template.label}
@@ -267,7 +267,7 @@ export default function SettingsPage() {
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     作品文件夹命名格式
                                 </label>
-                                <div className="flex flex-wrap gap-2 mb-2">
+                                <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 mb-2">
                                     {[
                                         {
                                             label: "时间_描述",
@@ -299,11 +299,11 @@ export default function SettingsPage() {
                                                     template.value,
                                                 )
                                             }
-                                            className={`px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-lg border transition-colors ${
+                                            className={`px-3 py-2 text-xs sm:text-sm rounded-lg border transition-colors font-medium ${
                                                 settings.workFolderNameFormat ===
                                                 template.value
-                                                    ? "bg-blue-600 text-white border-blue-600"
-                                                    : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-blue-500"
+                                                    ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                                                    : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-blue-500 active:scale-95"
                                             }`}
                                         >
                                             {template.label}
@@ -337,7 +337,7 @@ export default function SettingsPage() {
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     文件命名格式
                                 </label>
-                                <div className="flex flex-wrap gap-2 mb-2">
+                                <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 mb-2">
                                     {[
                                         {
                                             label: "描述_ID",
@@ -362,11 +362,11 @@ export default function SettingsPage() {
                                                     template.value,
                                                 )
                                             }
-                                            className={`px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-lg border transition-colors ${
+                                            className={`px-3 py-2 text-xs sm:text-sm rounded-lg border transition-colors font-medium ${
                                                 settings.fileNameFormat ===
                                                 template.value
-                                                    ? "bg-blue-600 text-white border-blue-600"
-                                                    : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-blue-500"
+                                                    ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                                                    : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-blue-500 active:scale-95"
                                             }`}
                                         >
                                             {template.label}
@@ -398,7 +398,7 @@ export default function SettingsPage() {
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     NFO 元数据格式
                                 </label>
-                                <div className="flex flex-wrap gap-2 mb-2">
+                                <div className="grid grid-cols-3 gap-2 mb-2">
                                     {[
                                         {
                                             label: "Jellyfin",
@@ -422,11 +422,11 @@ export default function SettingsPage() {
                                                     format.value,
                                                 )
                                             }
-                                            className={`px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-lg border transition-colors ${
+                                            className={`px-3 sm:px-4 py-2.5 text-sm rounded-lg border transition-colors font-medium ${
                                                 settings.nfo_format ===
                                                 format.value
-                                                    ? "bg-blue-600 text-white border-blue-600"
-                                                    : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-blue-500"
+                                                    ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                                                    : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-blue-500 active:scale-95"
                                             }`}
                                         >
                                             {format.label}
@@ -444,7 +444,7 @@ export default function SettingsPage() {
 
                             {message && (
                                 <div
-                                    className={`px-4 py-3 rounded-lg ${
+                                    className={`px-4 py-3 rounded-lg text-sm sm:text-base ${
                                         message.includes("成功")
                                             ? "bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400"
                                             : "bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400"
@@ -458,13 +458,13 @@ export default function SettingsPage() {
                                 <button
                                     onClick={saveSettings}
                                     disabled={saving}
-                                    className="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 dark:disabled:bg-gray-800"
+                                    className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 dark:disabled:bg-gray-800 font-medium transition-colors shadow-sm active:scale-[0.98]"
                                 >
                                     {saving ? "保存中..." : "保存设置"}
                                 </button>
                                 <button
                                     onClick={loadSettings}
-                                    className="w-full sm:w-auto px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
+                                    className="w-full sm:w-auto px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 font-medium transition-colors active:scale-[0.98]"
                                 >
                                     重置
                                 </button>

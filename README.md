@@ -14,6 +14,7 @@
 - ✅ **自定义设置**：配置下载目录、文件命名格式、API 地址等
 - ✅ **深色模式**：支持浅色/深色/跟随系统三种主题模式
 - ✅ **导入导出**：支持订阅配置的批量导入导出（JSON 格式）
+- ✅ **移动端 App**：支持打包成 Android 和 iOS 原生应用
 
 ## 技术栈
 
@@ -98,6 +99,43 @@ docker-compose up -d
 ```
 
 访问 http://localhost:3088
+
+## 📱 移动端 App 构建
+
+本项目支持打包成 Android 和 iOS 原生应用。详细说明请查看 [MOBILE.md](./MOBILE.md)。
+
+### 快速开始
+
+```bash
+# 构建并打开 Android Studio
+npm run mobile:android
+
+# 构建并打开 Xcode (macOS)
+npm run mobile:ios
+```
+
+### 可用命令
+
+| 命令 | 说明 |
+|------|------|
+| `npm run mobile:build` | 构建移动端静态文件 |
+| `npm run mobile:sync` | 构建并同步到原生项目 |
+| `npm run mobile:android` | 构建、同步并打开 Android Studio |
+| `npm run mobile:ios` | 构建、同步并打开 Xcode |
+
+更多详细信息请查看 [移动端构建指南](./MOBILE.md)。
+
+### CI/CD 自动构建
+
+支持通过 GitHub Actions 自动构建 APK 和 IPA：
+
+```bash
+# 推送 tag 触发自动构建和发布
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+详细配置请查看 [CI/CD 指南](./CI-CD.md)。
 
 ## 使用指南
 

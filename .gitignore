@@ -30,6 +30,11 @@ next-env.d.ts
 # Deploy
 /deploy
 
+# Capacitor
+android/
+ios/
+.capacitor/
+
 # Misc
 .DS_Store
 *.pem
