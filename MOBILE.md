@@ -2,6 +2,25 @@
 
 本项目已集成 Capacitor，可以将 Web 应用打包成原生 Android 和 iOS App。
 
+## ⚠️ 重要说明
+
+**架构模式：客户端-服务器模式**
+
+- 移动应用作为**客户端**，连接到运行中的服务器
+- 服务器需要单独部署（本地或远程）
+- 移动应用不包含后端逻辑和数据库
+- 需要在 `capacitor.config.ts` 中配置服务器地址
+
+**配置服务器地址：**
+```typescript
+// capacitor.config.ts
+server: {
+  url: 'http://192.168.60.20:3000', // 修改为你的服务器地址
+  cleartext: true,
+  androidScheme: 'http'
+}
+```
+
 ## 📋 目录
 
 - [环境要求](#环境要求)
