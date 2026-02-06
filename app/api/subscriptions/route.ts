@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/lib/db";
 import axios from "axios";
+import logger from "@/lib/logger";
 
 // 获取所有订阅
 export async function GET() {
@@ -13,7 +14,7 @@ export async function GET() {
 
         return NextResponse.json({ success: true, data: subscriptions });
     } catch (error: any) {
-        console.error("查询订阅列表失败:", error);
+        logger.error("查询订阅列表失败:", error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
@@ -65,9 +66,9 @@ export async function POST(request: NextRequest) {
             ...dateParams, // 添加时间范围参数
         };
 
-        console.log(`正在获取账号信息: ${sec_user_id}...`);
-        console.log(`API 请求地址: ${apiBaseUrl}/douyin/account`);
-        console.log(`API 请求参数:`, JSON.stringify(apiParams, null, 2));
+        logger.info(`正在获取账号信息: ${sec_user_id}...`);
+        logger.info(`API 请求地址: ${apiBaseUrl}/douyin/account`);
+        logger.debug(`API 请求参数:`, JSON.stringify(apiParams, null, 2));
         const startTime = Date.now();
 
         const response = await axios.post(
@@ -82,12 +83,12 @@ export async function POST(request: NextRequest) {
         );
 
         const elapsed = Date.now() - startTime;
-        console.log(`账号信息获取完成，耗时: ${elapsed}ms`);
-        console.log(`API 响应数据:`, JSON.stringify(response.data, null, 2));
+        logger.info(`账号信息获取完成，耗时: ${elapsed}ms`);
+        logger.debug(`API 响应数据:`, JSON.stringify(response.data, null, 2));
 
         // 如果响应时间超过 5 秒，给出警告
         if (elapsed > 5000) {
-            console.warn(
+            logger.warn(
                 `⚠️  TikTokDownloader API 响应较慢 (${elapsed}ms)，建议检查 API 服务状态`,
             );
         }
@@ -142,7 +143,7 @@ export async function POST(request: NextRequest) {
             message: "订阅添加成功",
         });
     } catch (error: any) {
-        console.error("创建订阅失败:", error);
+        logger.error("创建订阅失败:", error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
@@ -162,7 +163,7 @@ export async function DELETE(request: NextRequest) {
 
         return NextResponse.json({ success: true, message: "订阅删除成功" });
     } catch (error: any) {
-        console.error("删除订阅失败:", error);
+        logger.error("删除订阅失败:", error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

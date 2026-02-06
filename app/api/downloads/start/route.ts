@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import db from "@/lib/db";
+import db, { getSettings } from "@/lib/db";
 import logger from "@/lib/logger";
 import {
     formatFolderName,
     formatFileName,
     formatWorkFolderName,
+    prepareNamingParams,
 } from "@/lib/naming";
 import {
     generateVideoNFO,
@@ -12,6 +13,7 @@ import {
     getImageFileNames,
     NfoFormat,
 } from "@/lib/nfo-generator";
+import { createDownloadDirectory } from "@/lib/download-utils";
 import axios from "axios";
 import fs from "fs";
 import path from "path";
@@ -78,13 +80,7 @@ export async function POST(request: NextRequest) {
             ).run("downloading", 0, task_id);
 
             // 获取所有设置
-            const settingsRows = db
-                .prepare("SELECT key, value FROM settings")
-                .all() as any[];
-            const settings: Record<string, string> = {};
-            settingsRows.forEach((row) => {
-                settings[row.key] = row.value;
-            });
+            const settings = getSettings();
 
             // 获取下载目录
             const downloadDir =
@@ -99,34 +95,18 @@ export async function POST(request: NextRequest) {
             const mark = settings.mark || "";
 
             // 准备命名参数
-            const namingParams = {
-                uid: task.sec_user_id || task.author_uid || "unknown",
-                nickname: task.author_nickname || "unknown",
-                mark: mark,
-                type: "发布作品",
-                id: task.video_id,
-                desc: task.desc || "image_album",
-                create_time: task.create_time || "",
-            };
+            const namingParams = prepareNamingParams(task, mark);
 
-            // 格式化文件夹名
-            const folderName = formatFolderName(folderNameFormat, namingParams);
-            let targetDir = path.join(downloadDir, folderName);
+            // 创建下载目录
+            const targetDir = createDownloadDirectory(
+                downloadDir,
+                folderNameFormat,
+                workFolderNameFormat,
+                namingParams,
+            );
 
-            // 如果配置了作品文件夹格式，则创建作品子文件夹
-            let workFolderName = "";
-            if (workFolderNameFormat) {
-                workFolderName = formatWorkFolderName(
-                    workFolderNameFormat,
-                    namingParams,
-                );
-                targetDir = path.join(targetDir, workFolderName);
-            }
-
-            // 确保目标目录存在
-            if (!fs.existsSync(targetDir)) {
-                fs.mkdirSync(targetDir, { recursive: true });
-            }
+            // 获取相对文件夹路径（用于响应）
+            const folderName = path.relative(downloadDir, targetDir);
 
             // 格式化文件名前缀
             const fileNamePrefix = formatFileName(fileNameFormat, namingParams);
@@ -234,13 +214,7 @@ export async function POST(request: NextRequest) {
         ).run("downloading", 0, task_id);
 
         // 获取所有设置
-        const settingsRows = db
-            .prepare("SELECT key, value FROM settings")
-            .all() as any[];
-        const settings: Record<string, string> = {};
-        settingsRows.forEach((row) => {
-            settings[row.key] = row.value;
-        });
+        const settings = getSettings();
 
         // 获取下载目录
         const downloadDir =
@@ -255,34 +229,18 @@ export async function POST(request: NextRequest) {
         const mark = settings.mark || "";
 
         // 准备命名参数
-        const namingParams = {
-            uid: task.sec_user_id || task.author_uid || "unknown",
-            nickname: task.author_nickname || "unknown",
-            mark: mark,
-            type: "发布作品", // 默认类型，后续可以根据实际情况调整
-            id: task.video_id,
-            desc: task.desc || "video",
-            create_time: task.create_time || "",
-        };
+        const namingParams = prepareNamingParams(task, mark);
 
-        // 格式化文件夹名
-        const folderName = formatFolderName(folderNameFormat, namingParams);
-        let targetDir = path.join(downloadDir, folderName);
+        // 创建下载目录
+        const targetDir = createDownloadDirectory(
+            downloadDir,
+            folderNameFormat,
+            workFolderNameFormat,
+            namingParams,
+        );
 
-        // 如果配置了作品文件夹格式，则创建作品子文件夹
-        let workFolderName = "";
-        if (workFolderNameFormat) {
-            workFolderName = formatWorkFolderName(
-                workFolderNameFormat,
-                namingParams,
-            );
-            targetDir = path.join(targetDir, workFolderName);
-        }
-
-        // 确保目标目录存在
-        if (!fs.existsSync(targetDir)) {
-            fs.mkdirSync(targetDir, { recursive: true });
-        }
+        // 获取相对文件夹路径（用于响应）
+        const folderName = path.relative(downloadDir, targetDir);
 
         // 格式化文件名
         const fileName = formatFileName(fileNameFormat, namingParams);

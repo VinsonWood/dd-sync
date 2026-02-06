@@ -55,6 +55,7 @@ export function formatName(template: string, params: NamingParams): string {
 
 /**
  * 格式化文件夹名称
+ * 这是主实现函数，其他命名函数都是它的别名
  */
 export function formatFolderName(
     template: string,
@@ -65,17 +66,28 @@ export function formatFolderName(
 
 /**
  * 格式化作品文件夹名称
+ * 别名：与 formatFolderName 共享同一实现
  */
-export function formatWorkFolderName(
-    template: string,
-    params: NamingParams,
-): string {
-    return cleanFileName(formatName(template, params));
-}
+export const formatWorkFolderName = formatFolderName;
 
 /**
  * 格式化文件名称（不包含扩展名）
+ * 别名：与 formatFolderName 共享同一实现
  */
-export function formatFileName(template: string, params: NamingParams): string {
-    return cleanFileName(formatName(template, params));
+export const formatFileName = formatFolderName;
+
+/**
+ * 准备命名参数
+ * 从任务数据中提取并格式化命名所需的参数
+ */
+export function prepareNamingParams(task: any, mark: string): NamingParams {
+    return {
+        uid: task.sec_user_id || task.author_uid || "unknown",
+        nickname: task.author_nickname || "unknown",
+        mark: mark,
+        type: "发布作品",
+        id: task.video_id,
+        desc: task.desc || "...",
+        create_time: task.create_time || "",
+    };
 }

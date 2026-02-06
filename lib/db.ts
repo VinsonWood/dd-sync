@@ -186,4 +186,14 @@ if (typeof window === "undefined" && !global.__scheduler_started) {
     });
 }
 
+// 获取所有设置
+export function getSettings(): Record<string, string> {
+    const rows = db.prepare("SELECT key, value FROM settings").all() as any[];
+    const settings: Record<string, string> = {};
+    rows.forEach((row) => {
+        settings[row.key] = row.value;
+    });
+    return settings;
+}
+
 export default db;

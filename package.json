@@ -7,12 +7,7 @@
         "dev": "next dev",
         "build": "next build",
         "start": "next start",
-        "lint": "next lint",
-        "test": "node test/selenium.test.cjs",
-        "test:api": "node test/api.test.cjs",
-        "test:advanced": "node test/selenium.advanced.cjs",
-        "test:headed": "HEADLESS=false node test/selenium.test.cjs",
-        "test:all": "node test/api.test.cjs && node test/selenium.test.cjs && node test/selenium.advanced.cjs"
+        "lint": "next lint"
     },
     "dependencies": {
         "@tailwindcss/postcss": "^4.1.18",

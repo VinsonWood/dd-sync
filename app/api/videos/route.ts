@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/lib/db";
 import axios from "axios";
+import logger from "@/lib/logger";
 
 // 获取视频列表
 export async function GET(request: NextRequest) {
@@ -25,7 +26,7 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json({ success: true, data: videos });
     } catch (error: any) {
-        console.error("查询视频失败:", error);
+        logger.error("查询视频失败:", error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
@@ -91,7 +92,7 @@ export async function POST(request: NextRequest) {
             message: "获取数据成功",
         });
     } catch (error: any) {
-        console.error("获取视频失败:", error);
+        logger.error("获取视频失败:", error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

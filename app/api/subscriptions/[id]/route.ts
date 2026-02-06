@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/lib/db";
+import logger from "@/lib/logger";
 
 // 更新订阅
 export async function PATCH(
@@ -56,7 +57,7 @@ export async function PATCH(
             message: "订阅更新成功",
         });
     } catch (error: any) {
-        console.error("更新订阅失败:", error);
+        logger.error("更新订阅失败:", error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
